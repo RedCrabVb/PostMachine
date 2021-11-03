@@ -1,16 +1,24 @@
-class Parse(commands: Array[String]) {
+import scala.language.implicitConversions
 
-  val lexemes = for (command <- commands) yield {
-    implicit def anyToInt(any: Any): Int = (any.toString.replaceAll("\\.", "").toInt)
+class Parse(commands: Array[String]) {
+  val (moveF, moveB, removeVal, setVal, stop, itIs) = (">", "<", "X", "V", "!", "?")
+  val lexemes: Array[Lexeme] = for (command <- commands) yield {
+    implicit def anyToInt(any: Any): Int = any.toString.replaceAll("\\.", "").toInt
 
     command.toUpperCase.split(" ").toList match {
-      case number :: "!" :: _ => Stop(number)
-      case number :: ">" :: nextCommand :: _ => MoveForwardLexeme(number, nextCommand)
-      case number :: "<" :: nextCommand :: _ => MoveBackLexeme(number, nextCommand)
-      case number :: "X" :: nextCommand :: _ => RemoveLexeme(number, nextCommand)
-      case number :: "V" :: nextCommand :: _ => SetLexeme(number, nextCommand)
-      case number :: "?" :: nextCommandA :: nextCommandB :: _ => ConditionLexeme(number, nextCommandA, nextCommandB)
-      case error => throw new RuntimeException("error parse lexeme, " + command)
+      case number :: `stop` :: _ => Stop(number)
+      case number :: `moveF` :: nextCommand :: Nil => MoveForwardLexeme(number, nextCommand)
+      case number :: `moveB` :: nextCommand :: Nil => MoveBackLexeme(number, nextCommand)
+      case number :: `moveF` :: Nil => new MoveForwardLexeme(number)
+      case number :: `moveB` :: Nil => new MoveBackLexeme(number)
+
+      case number :: `removeVal` :: nextCommand :: Nil => RemoveLexeme(number, nextCommand)
+      case number :: `setVal` :: nextCommand :: Nil => SetLexeme(number, nextCommand)
+      case number :: `removeVal` :: Nil => new RemoveLexeme(number)
+      case number :: `setVal` :: Nil => new SetLexeme(number)
+
+      case number :: `itIs` :: nextCommandA :: nextCommandB :: _ => ConditionLexeme(number, nextCommandA, nextCommandB)
+      case _ => throw new RuntimeException("error parse lexeme, " + command)
     }
   }
 }

@@ -2,34 +2,29 @@ import scala.collection.mutable.ListBuffer
 import scala.io.StdIn.readLine
 
 object Main {
+
+  def readInputLexemes(): Array[String] = {
+    println("Hello, enter input data (finish enter on 'q')")
+
+    val inputMutable = ListBuffer[String]()
+    var i = 1
+    do {
+      val inputStr = i.toString + " " + readLine(i.toString + " ")
+      inputMutable.addOne(inputStr)
+      i += 1
+    } while ((!inputMutable.last.contains("q")))
+    inputMutable.remove(inputMutable.size - 1)
+
+    inputMutable.toArray
+  }
+
   def main(args: Array[String]): Unit = {
     println("hello world")
 
-    /*    val input =
-          """1. ? 2 4
-            |2. V 3
-            |3. !
-            |4. x 5
-            |5. > 6
-            |6. ? 8 7
-            |7. < 6
-            |8. > 1
-            |""".stripMargin.split("\n")*/
-    println("Hello, enter input data (finish enter on 'q')")
-    val inputMutable = ListBuffer[String]()
-    var inputStr: String = 1.toString + " " + readLine(1.toString + " ")
-    var i = 1
-    while (!inputStr.contains("q")) {
-      i += 1
-      inputMutable.addOne(inputStr)
-      inputStr = i.toString + " " + readLine(i.toString + " ")
-    }
-
-    val input = inputMutable.toArray
-    println(input.mkString(", "))
-
+    val input = readInputLexemes()
     val parser = new Parse(input)
 
+    println(input.mkString(", "))
     println(parser.lexemes.mkString(" "))
 
     val ribbon = Array.fill(10)(0)
@@ -38,48 +33,36 @@ object Main {
     ribbon(4) = 1
     var index = 2
 
-    def printRibbon(): Unit = {
-      val ribbonStr = for (element <- ribbon) yield {
-        element match {
-          case 0 => "[ ]"
-          case 1 => "[V]"
-          case _ => "[error]"
-        }
+    def outRibbon(): String = {
+      val ribbonList = ribbon.map {
+        case 0 => "[ ]"
+        case 1 => "[V]"
+        case _ => "[error]"
       }
-      println(ribbonStr.mkString("") + "")
-      println(s" ${" " * 3 * index} _\n")
+      s"${ribbonList.mkString("")} \n ${" " * 3 * index} _\n"
     }
 
-    def callingСommands(numberCommand: Int): Unit = {
-      println(numberCommand + " " + parser.lexemes.find(_.number == numberCommand).get)
-      val callingNext = parser.lexemes.find(_.number == numberCommand).get match {
-        case MoveBackLexeme(_, nextCommand) =>
-          index -= 1
-          nextCommand
-        case MoveForwardLexeme(_, nextCommand) =>
-          index += 1
-          nextCommand
-        case SetLexeme(_, nextCommand) =>
-          ribbon(index) = 1
-          nextCommand
-        case RemoveLexeme(_, nextCommand) =>
-          ribbon(index) = 0
-          nextCommand
+    def callingCommands(numberCommand: Int, out: String = ""): String = {
+      val lexeme = parser.lexemes.find(_.number == numberCommand).get
+      def calling(nextCommand: Int) = callingCommands(nextCommand, s"$out $numberCommand $lexeme \n ${outRibbon()}\n")
+
+      lexeme match {
+        case MoveBackLexeme(_, nextCommand) => index -= 1; calling(nextCommand)
+        case MoveForwardLexeme(_, nextCommand) => index += 1; calling(nextCommand)
+        case SetLexeme(_, nextCommand) => ribbon(index) = 1; calling(nextCommand)
+        case RemoveLexeme(_, nextCommand) => ribbon(index) = 0; calling(nextCommand)
         case ConditionLexeme(_, numberA, numberB) =>
-          if (ribbon(index) == 0) {
+          val nextCommand = if (ribbon(index) == 0) {
             numberA
           } else {
             numberB
           }
-        case Stop(_) => -1
-      }
-      printRibbon()
-      if (callingNext != -1) {
-        callingСommands(callingNext)
+          calling(nextCommand)
+        case Stop(_) => out
       }
     }
 
-    callingСommands(1)
-
+    val out = callingCommands(1)
+    println(out)
   }
 }
