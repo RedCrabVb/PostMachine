@@ -1,37 +1,18 @@
-import scala.collection.mutable.ListBuffer
-import scala.io.StdIn.readLine
+
 
 object Main {
-
-  def readInputLexemes(): Array[String] = {
-    println("Hello, enter input data (finish enter on 'q')")
-
-    val inputMutable = ListBuffer[String]()
-    var i = 1
-    do {
-      val inputStr = i.toString + " " + readLine(i.toString + " ")
-      inputMutable.addOne(inputStr)
-      i += 1
-    } while ((!inputMutable.last.contains("q")))
-    inputMutable.remove(inputMutable.size - 1)
-
-    inputMutable.toArray
-  }
 
   def main(args: Array[String]): Unit = {
     println("hello world")
 
-    val input = readInputLexemes()
+    val argsParser = new ArgsParser(args)
+    val input = argsParser.inputLexemes
     val parser = new Parse(input)
+    val ribbon = argsParser.inputRibbon
+    var carriage = 2
 
     println(input.mkString(", "))
     println(parser.lexemes.mkString(" "))
-
-    val ribbon = Array.fill(10)(0)
-    ribbon(0) = 1
-    ribbon(2) = 1
-    ribbon(4) = 1
-    var index = 2
 
     def outRibbon(): String = {
       val ribbonList = ribbon.map {
@@ -39,7 +20,7 @@ object Main {
         case 1 => "[V]"
         case _ => "[error]"
       }
-      s"${ribbonList.mkString("")} \n ${" " * 3 * index} _\n"
+      s"${ribbonList.mkString("")} \n ${" " * 3 * carriage} _\n"
     }
 
     def callingCommands(numberCommand: Int, out: String = ""): String = {
@@ -47,12 +28,12 @@ object Main {
       def calling(nextCommand: Int) = callingCommands(nextCommand, s"$out $numberCommand $lexeme \n ${outRibbon()}\n")
 
       lexeme match {
-        case MoveBackLexeme(_, nextCommand) => index -= 1; calling(nextCommand)
-        case MoveForwardLexeme(_, nextCommand) => index += 1; calling(nextCommand)
-        case SetLexeme(_, nextCommand) => ribbon(index) = 1; calling(nextCommand)
-        case RemoveLexeme(_, nextCommand) => ribbon(index) = 0; calling(nextCommand)
+        case MoveBackLexeme(_, nextCommand) => carriage -= 1; calling(nextCommand)
+        case MoveForwardLexeme(_, nextCommand) => carriage += 1; calling(nextCommand)
+        case SetLexeme(_, nextCommand) => ribbon(carriage) = 1; calling(nextCommand)
+        case RemoveLexeme(_, nextCommand) => ribbon(carriage) = 0; calling(nextCommand)
         case ConditionLexeme(_, numberA, numberB) =>
-          val nextCommand = if (ribbon(index) == 0) {
+          val nextCommand = if (ribbon(carriage) == 0) {
             numberA
           } else {
             numberB
