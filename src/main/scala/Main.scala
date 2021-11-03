@@ -3,13 +3,11 @@
 object Main {
 
   def main(args: Array[String]): Unit = {
-    println("hello world")
-
     val argsParser = new ArgsParser(args)
     val input = argsParser.inputLexemes
     val parser = new Parse(input)
     val ribbon = argsParser.inputRibbon
-    var carriage = 2
+    var carriage = argsParser.carriage
 
     println(input.mkString(", "))
     println(parser.lexemes.mkString(" "))
@@ -20,13 +18,12 @@ object Main {
         case 1 => "[V]"
         case _ => "[error]"
       }
-      s"${ribbonList.mkString("")} \n ${" " * 3 * carriage} _\n"
+      s"${ribbonList.mkString("")} \n  ${"   " * carriage}_\t\t${carriage}\n"
     }
 
     def callingCommands(numberCommand: Int, out: String = ""): String = {
       val lexeme = parser.lexemes.find(_.number == numberCommand).get
       def calling(nextCommand: Int) = callingCommands(nextCommand, s"$out $numberCommand $lexeme \n ${outRibbon()}\n")
-
       lexeme match {
         case MoveBackLexeme(_, nextCommand) => carriage -= 1; calling(nextCommand)
         case MoveForwardLexeme(_, nextCommand) => carriage += 1; calling(nextCommand)

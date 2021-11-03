@@ -1,7 +1,7 @@
 import ArgsParser.{MapOptional, help}
 
 import scala.annotation.tailrec
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.io.Source
 import scala.io.StdIn.readLine
 import scala.sys.exit
@@ -19,8 +19,19 @@ object ArgsParser {
       |Syntax:
       |1. [Command number] x [Command name] 9 [next command, optional]
       |
-      |An example program adding two numbers
+      |Subtracting two numbers:
+      |1 <
+      |2 ? 1 3
+      |3 x
+      |4 >
+      |5 ? 4 6
+      |6 x
+      |7 > 8
+      |8 ? 9 1
+      |9 !
       |
+      |Ribbon:
+      |V_6 0_2 v_3
       |""".stripMargin
 
 }
@@ -30,7 +41,7 @@ class ArgsParser(val args: Array[String]) {
   val mapOption: MapOptional = nextOption(args.toList)
 
   def readInputLexemes(): Array[String] = {
-    println("Hello, enter input data (finish enter on 'q')")
+    println("Enter input data (finish enter on 'q')")
 
     val inputMutable = ListBuffer[String]()
     var i = 1
@@ -44,6 +55,22 @@ class ArgsParser(val args: Array[String]) {
     inputMutable.toArray
   }
 
+  def readRibbon(ribbonStr: String): Array[Int] = {
+    val ribbonArr = ribbonStr
+      .toUpperCase
+      .replace("V", "1")
+      .replace("X", "0")
+      .split("-").toList.map(_.split("_"))
+      .map(t => (t(0).toInt, t(1).toInt))
+    val arrayBuffer = ArrayBuffer[Int]()
+    arrayBuffer.addAll(Array(0, 0, 0, 0, 0, 0))
+    ribbonArr.map(a => (1 to a._2).map(v => arrayBuffer append a._1))
+    while (arrayBuffer.size < 20) {
+      arrayBuffer.append(0)
+    }
+    arrayBuffer.toArray
+  }
+
   val inputLexemes: Array[String] = {
     val inpath: String = mapOption.getOrElse("inpath", null)
     if (inpath != null) {
@@ -53,19 +80,17 @@ class ArgsParser(val args: Array[String]) {
     }
   }
 
+  val carriage: Int = mapOption.getOrElse("carriage", "1").toInt
+
   val inputRibbon: Array[Int] = {
-    val inpath: String = mapOption.getOrElse("inpathr", null)
-    if (inpath != null) {
-//      new File(inpath).toString.toArray
-      null
+    val inpathr: String = mapOption.getOrElse("inpathr", null)
+    if (inpathr != null) {
+      println(inpathr)
+      println(readRibbon(inpathr).mkString(" "))
+      readRibbon(inpathr)
     } else {
-      val ribbon = Array.fill(10)(0)
-      ribbon(0) = 1
-      ribbon(1) = 1
-      ribbon(2) = 1
-      ribbon(4) = 1
-      ribbon(5) = 1
-      ribbon
+      val ribbonStr = readLine("Enter ribbon: ")
+      readRibbon(ribbonStr)
     }
   }
 
