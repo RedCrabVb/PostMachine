@@ -1,12 +1,11 @@
-import ArgsParser.{MapOptional, help}
+import org.apache.commons.cli._
 
-import scala.annotation.tailrec
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.io.Source
 import scala.io.StdIn.readLine
 import scala.sys.exit
 
-object ArgsParser {
+/*object ArgsParser {
   type MapOptional = Map[String, String]
   private val help =
     """
@@ -34,11 +33,96 @@ object ArgsParser {
       |V_6 0_2 v_3
       |""".stripMargin
 
-}
+}*/
 
 
 class ArgsParser(val args: Array[String]) {
-  val mapOption: MapOptional = nextOption(args.toList)
+  validation()
+
+  def inputLexemes(): Array[String] = _inputLexemes
+  def carriage(): Int = _carriage
+  def inputRibbon(): Array[Int] = _inputRibbon
+
+  private var _inputLexemes: Array[String] = _
+  private var _carriage: Int = _
+  private var _inputRibbon: Array[Int] = _
+
+
+  private[this] def validation(): Unit = {
+    val options = new Options()
+
+
+    val help = new Option("h", "help", false, "parameter for displaying this help")
+    val carriage = new Option("c", "carriage", true, "start value of the caret")
+    val inpath = new Option("inp", "inpath", true, "path to text file with code")
+    val inpathr = new Option("inr", "inpathr", true, "path to text ribbon ")
+
+    options.addOption(help)
+      .addOption(help)
+      .addOption(carriage)
+      .addOption(inpath)
+      .addOption(inpathr)
+
+    val parser = new DefaultParser()
+
+    def helpPrint() = {
+      val formatter = new HelpFormatter()
+      println("This is program emulator Post Machine")
+      println("==========================================================================================")
+      formatter.printHelp("Lab-runner", options)
+      println(""" |Syntax:
+                |1. [Command number] x [Command name] 9 [next command, optional]
+                |
+                |Subtracting two numbers:
+                |1 <
+                |2 ? 1 3
+                |3 x
+                |4 >
+                |5 ? 4 6
+                |6 x
+                |7 > 8
+                |8 ? 9 1
+                |9 !
+                |
+                |Ribbon:
+                |V_6 0_2 v_3
+                |.stripMargin""".stripMargin)
+      exit(0)
+    }
+
+    try {
+      parser.parse(options, args)
+      val cmd = parser.parse(options, args)
+
+      if (cmd.hasOption(help)) {
+        helpPrint()
+      }
+
+      _inputLexemes = if (cmd.hasOption(inpath)) {
+        val inpathVar = cmd.getOptionValue(inpath)
+        Source.fromFile(inpathVar).getLines().toArray
+      } else {
+        readInputLexemes()
+      }
+
+      _carriage = if (cmd.hasOption(carriage)) {
+        cmd.getOptionValue(carriage).toInt
+      } else {
+        1
+      }
+
+      _inputRibbon = if (cmd.hasOption(inpathr)) {
+        readRibbon(cmd.getOptionValue(inpathr))
+      } else {
+        Array.fill(10)(0)
+      }
+    }
+    catch {
+      case e: Exception =>
+        e.printStackTrace()
+        helpPrint()
+    }
+  }
 
   def readInputLexemes(): Array[String] = {
     println("Enter input data (finish enter on 'q')")
@@ -64,44 +148,10 @@ class ArgsParser(val args: Array[String]) {
       .map(t => (t(0).toInt, t(1).toInt))
     val arrayBuffer = ArrayBuffer[Int]()
     arrayBuffer.addAll(Array(0, 0, 0, 0, 0, 0))
-    ribbonArr.map(a => (1 to a._2).map(v => arrayBuffer append a._1))
+    ribbonArr.map(a => (1 to a._2).map(_ => arrayBuffer append a._1))
     while (arrayBuffer.size < 20) {
       arrayBuffer.append(0)
     }
     arrayBuffer.toArray
   }
-
-  val inputLexemes: Array[String] = {
-    val inpath: String = mapOption.getOrElse("inpath", null)
-    if (inpath != null) {
-      Source.fromFile(inpath).getLines().toArray
-    } else {
-      readInputLexemes()
-    }
-  }
-
-  val carriage: Int = mapOption.getOrElse("carriage", "1").toInt
-
-  val inputRibbon: Array[Int] = {
-    val inpathr: String = mapOption.getOrElse("inpathr", null)
-    if (inpathr != null) {
-      println(inpathr)
-      println(readRibbon(inpathr).mkString(" "))
-      readRibbon(inpathr)
-    } else {
-      val ribbonStr = readLine("Enter ribbon: ")
-      readRibbon(ribbonStr)
-    }
-  }
-
-  @tailrec
-  private final def nextOption(list: List[String], map: MapOptional = Map()): MapOptional = {
-    list match {
-      case Nil => map
-      case key :: value :: tail => nextOption(tail, Map(key.substring(2) -> value) ++ map)
-      case "--help" :: _ => println(help); exit(0)
-      case _ => throw new RuntimeException("Not valid optional")
-    }
-  }
-
 }
