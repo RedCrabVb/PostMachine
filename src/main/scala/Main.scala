@@ -54,6 +54,10 @@ object Main {
     def callingCommands(numberCommand: Int, out: String = ""): String = {
       val lexeme = parser.lexemes.find(_.number == numberCommand).get
 
+      if (out.split("\n").length/5 > 30) {
+        return out + "\nError: Perhaps a cycle"
+      }
+
       def calling(nextCommand: Int) = callingCommands(nextCommand, s"$out $numberCommand $lexeme \n ${ribbonObj.outRibbon()}\n")
 
       lexeme match {
