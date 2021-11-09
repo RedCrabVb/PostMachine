@@ -5,37 +5,6 @@ import scala.io.Source
 import scala.io.StdIn.readLine
 import scala.sys.exit
 
-/*object ArgsParser {
-  type MapOptional = Map[String, String]
-  private val help =
-    """
-      |This is program emulator Post Machine
-      |====================================================================================
-      |--help                           - parameter for displaying this help
-      |--inpath [path file]             - path to text file with code [optional, default console input]
-      |--inpathr [path file]            - path to text ribbon [optional, default console input]
-      |--carriage [number]              - start value of the caret [optional, default console input]
-      |Syntax:
-      |1. [Command number] x [Command name] 9 [next command, optional]
-      |
-      |Subtracting two numbers:
-      |1 <
-      |2 ? 1 3
-      |3 x
-      |4 >
-      |5 ? 4 6
-      |6 x
-      |7 > 8
-      |8 ? 9 1
-      |9 !
-      |
-      |Ribbon:
-      |V_6 0_2 v_3
-      |""".stripMargin
-
-}*/
-
-
 class ArgsParser(val args: Array[String]) {
   validation()
 
@@ -112,7 +81,7 @@ class ArgsParser(val args: Array[String]) {
       }
 
       _inputRibbon = if (cmd.hasOption(inpathr)) {
-        readRibbon(cmd.getOptionValue(inpathr))
+        readRibbon(Source.fromFile(cmd.getOptionValue(inpathr)).mkString(""))
       } else {
         Array.fill(10)(0)
       }
