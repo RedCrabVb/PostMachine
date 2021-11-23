@@ -11,7 +11,7 @@ object Main {
     println(parser.lexemes.mkString(" "))
     println(ribbon.mkString(" "))
 
-    val ribbonObj = new Ribbon(ribbon, ribbon.length / 2)
+    val ribbonObj = new Ribbon(ribbon, argsParser.carriage())
 
 
 

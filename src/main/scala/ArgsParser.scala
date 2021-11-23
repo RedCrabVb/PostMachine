@@ -115,9 +115,9 @@ class ArgsParser(val args: Array[String]) {
       .replace("X", "0")
       .split("-").toList.map(_.split("_"))
       .map(t => (t(0).toInt, t(1).toInt))
-    val arrayBuffer = ArrayBuffer.fill(25)(0)
+    val arrayBuffer = ArrayBuffer.fill(50)(0)
     ribbonArr.map(a => (1 to a._2).map(_ => arrayBuffer append a._1))
-    while (arrayBuffer.size < 50) {
+    while (arrayBuffer.size < 100) {
       arrayBuffer.append(0)
     }
     arrayBuffer.toArray

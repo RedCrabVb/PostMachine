@@ -1,6 +1,6 @@
 //50 - 0, 49 - -1, 51 - 1
 class Ribbon(private val array: Array[Int], private var carriage: Int) {
-//  carriage += array.size / 2
+  carriage += array.size / 2
 
   def this() = this(Array.fill[Int](100)(0), 1)
 
