@@ -19,7 +19,7 @@ class Ribbon(private val array: Array[Int], private var carriage: Int) {
     this
   }
 
-  def cellIsEmpty(): Boolean = carriage == 0
+  def cellIsEmpty(): Boolean = array(carriage) == 0
 
   def outRibbon(): String = {
     val arrayRibbon = array.zip(0 to array.length).slice(carriage - 5, carriage + 5)
