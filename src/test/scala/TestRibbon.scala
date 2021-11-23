@@ -16,4 +16,12 @@ class TestRibbon extends AnyFlatSpec with should.Matchers {
 
     ribbon.cellIsEmpty() should be (false)
   }
+
+  it should "move back" in {
+    ribbon.cellIsEmpty() should be (false)
+
+    ribbon.moveBack()
+
+    ribbon.cellIsEmpty() should be (true)
+  }
 }
